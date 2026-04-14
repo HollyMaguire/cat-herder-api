@@ -131,11 +131,9 @@ module Api
           contact_type = inv[:type]    || inv["type"] || "email"
           next if contact.blank?
 
-          nickname = inv[:nickname] || inv["nickname"]
           invite = event.invites.create!(
             contact:      contact,
             contact_type: contact_type,
-            nickname:     nickname,
           )
 
           # If this contact already has a user account, link immediately
@@ -145,7 +143,6 @@ module Api
       end
 
       def event_json(event)
-        hidden = hidden_guest?(event)
         {
           id:                event.id,
           name:              event.name,
@@ -163,51 +160,28 @@ module Api
           start_time:        event.start_time,
           is_owner:          event.owner_id == @current_user&.id,
           owner:             { id: event.owner_id, username: event.owner.username },
-          items:             hidden ? [] : event.items.map { |i| item_json(i) },
-          items_hidden:      hidden,
+          items:             event.items.map { |i| item_json(i) },
           invites:           event.invites.map { |inv| invite_json(inv) },
           availability_results: event.availability_results,
         }
       end
 
-      def hidden_guest?(event)
-        return false unless event.items_mode == "gift" && event.gift_hidden_from.present?
-
-        hidden_name = event.gift_hidden_from.strip.downcase
-        return true if hidden_name == @current_user.username.downcase
-        return true if @current_user.display_name.present? && hidden_name == @current_user.display_name.strip.downcase
-
-        my_invite = event.invites.find { |inv| inv.user_id == @current_user.id }
-        if my_invite
-          return true if my_invite.nickname.present? && hidden_name == my_invite.nickname.strip.downcase
-          return true if hidden_name == my_invite.contact.downcase
-          if my_invite.contact_type == "email"
-            local_part = my_invite.contact.split("@").first.downcase
-            return true if hidden_name == local_part
-          end
-        end
-
-        false
-      end
-
       def item_json(item)
         {
-          id:          item.id,
-          name:        item.name,
-          claimed_by:  item.claimed_by ? item.claimed_by.username : nil,
-          added_by:    item.added_by ? item.added_by.username : nil,
-          added_by_id: item.added_by_id,
+          id:         item.id,
+          name:       item.name,
+          claimed_by: item.claimed_by ? item.claimed_by.username : nil,
         }
       end
 
       def invite_json(inv)
         {
-          id:           inv.id,
-          contact_type: inv.contact_type,
-          status:       inv.status,
-          is_vip:       inv.is_vip,
-          nickname:     inv.nickname,
-          username:     inv.user&.username,
+          id:            inv.id,
+          contact_type:  inv.contact_type,
+          status:        inv.status,
+          is_vip:        inv.is_vip,
+          display_label: inv.nickname.presence || inv.user&.display_name,
+          username:      inv.user&.username,
         }
       end
     end

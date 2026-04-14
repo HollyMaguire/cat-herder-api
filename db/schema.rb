@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_14_161201) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_14_192522) do
   create_table "availabilities", force: :cascade do |t|
     t.json "slots"
     t.integer "user_id", null: false
@@ -61,6 +61,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_14_161201) do
     t.integer "claimed_by_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "added_by_id"
+    t.index ["added_by_id"], name: "index_items_on_added_by_id"
     t.index ["event_id"], name: "index_items_on_event_id"
   end
 

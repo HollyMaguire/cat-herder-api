@@ -4,15 +4,11 @@ module Api
       class AuthController < ApplicationController
   
         # POST /api/v1/auth/login
-        # Body: { contact: "user@email.com", contact_type: "email" }
-        #
-        # Returns 200 + JWT if user found.
-        # Returns 404 if no user — frontend then shows username setup screen.
         def login
           user = User.find_by_contact(params[:contact], params[:contact_type])
   
           if user
-            # Claim any pending invites that match this contact
+            user.update(display_name: params[:display_name]) if params[:display_name].present?
             Invite.claim_for_user(user)
             render json: { token: generate_token(user), user: user_json(user) }, status: :ok
           else
@@ -21,19 +17,31 @@ module Api
         end
   
         # POST /api/v1/auth/register
-        # Body: { contact: "...", contact_type: "email"|"phone", username: "..." }
-        #
-        # Creates a new user and returns a JWT.
+        # No username required — auto-generated from contact
         def register
+          contact      = params[:contact].to_s.strip
+          contact_type = params[:contact_type]
+  
+          # Auto-generate a unique username from the contact
+          base = contact_type == "email" ? contact.split("@").first : contact.gsub(/\D/, '')
+          base = base.gsub(/[^a-zA-Z0-9_]/, '_').first(20).presence || "user"
+          username = base
+          suffix   = 1
+          while User.exists?(username: username)
+            username = "#{base}_#{suffix}"
+            suffix  += 1
+          end
+  
           user_params = {
-            username:     params[:username],
-            contact_type: params[:contact_type],
+            username:     username,
+            display_name: params[:display_name].presence,
+            contact_type: contact_type,
           }
   
-          if params[:contact_type] == "email"
-            user_params[:email] = params[:contact]
+          if contact_type == "email"
+            user_params[:email] = contact
           else
-            user_params[:phone] = params[:contact]
+            user_params[:phone] = contact
           end
   
           user = User.new(user_params)
@@ -46,7 +54,7 @@ module Api
           end
         end
   
-        # GET /api/v1/auth/me  — returns the current user from token
+        # GET /api/v1/auth/me
         def me
           authenticate_user!
           render json: { user: user_json(@current_user) }
@@ -58,6 +66,7 @@ module Api
           {
             id:           user.id,
             username:     user.username,
+            display_name: user.display_name,
             email:        user.email,
             phone:        user.phone,
             contact_type: user.contact_type,
@@ -66,4 +75,3 @@ module Api
       end
     end
   end
-  

@@ -29,14 +29,18 @@ module Api
       # }
       def create
         @event = Event.new(
-          owner:            @current_user,
-          name:             params[:eventName],
-          description:      params[:description],
-          vote_mode:        params[:voteMode],
-          items_mode:       params[:itemsMode]       || "none",
-          gift_hidden_from: params[:giftHiddenFrom],
-          date_range_start: params[:dateRangeStart],
-          date_range_end:   params[:dateRangeEnd],
+          owner:             @current_user,
+          name:              params[:eventName],
+          description:       params[:description],
+          vote_mode:         params[:voteMode],
+          items_mode:        params[:itemsMode]        || "none",
+          gift_hidden_from:  params[:giftHiddenFrom],
+          date_range_start:  params[:dateRangeStart],
+          date_range_end:    params[:dateRangeEnd],
+          invite_permission: params[:invitePermission] || "host",
+          vip_permission:    params[:vipPermission]    || "host",
+          start_time_mode:   params[:startTimeMode]    || "none",
+          start_time:        params[:startTime],
         )
 
         if @event.save
@@ -140,20 +144,24 @@ module Api
 
       def event_json(event)
         {
-          id:               event.id,
-          name:             event.name,
-          description:      event.description,
-          vote_mode:        event.vote_mode,
-          items_mode:       event.items_mode,
-          gift_hidden_from: event.gift_hidden_from,
-          date_range_start: event.date_range_start,
-          date_range_end:   event.date_range_end,
-          confirmed_date:   event.confirmed_date,
-          status:           event.status,
-          is_owner:         event.owner_id == @current_user&.id,
-          owner:            { id: event.owner_id, username: event.owner.username },
-          items:            event.items.map { |i| item_json(i) },
-          invites:          event.invites.map { |inv| invite_json(inv) },
+          id:                event.id,
+          name:              event.name,
+          description:       event.description,
+          vote_mode:         event.vote_mode,
+          items_mode:        event.items_mode,
+          gift_hidden_from:  event.gift_hidden_from,
+          date_range_start:  event.date_range_start,
+          date_range_end:    event.date_range_end,
+          confirmed_date:    event.confirmed_date,
+          status:            event.status,
+          invite_permission: event.invite_permission,
+          vip_permission:    event.vip_permission,
+          start_time_mode:   event.start_time_mode,
+          start_time:        event.start_time,
+          is_owner:          event.owner_id == @current_user&.id,
+          owner:             { id: event.owner_id, username: event.owner.username },
+          items:             event.items.map { |i| item_json(i) },
+          invites:           event.invites.map { |inv| invite_json(inv) },
           availability_results: event.availability_results,
         }
       end
@@ -168,12 +176,12 @@ module Api
 
       def invite_json(inv)
         {
-          id:           inv.id,
-          contact:      inv.contact,
-          contact_type: inv.contact_type,
-          status:       inv.status,
-          is_vip:       inv.is_vip,
-          username:     inv.user&.username,
+          id:            inv.id,
+          contact_type:  inv.contact_type,
+          status:        inv.status,
+          is_vip:        inv.is_vip,
+          display_label: inv.nickname.presence || inv.user&.display_name,
+          username:      inv.user&.username,
         }
       end
     end

@@ -7,9 +7,10 @@ class User < ApplicationRecord
   has_many :votes,          dependent: :destroy
   has_many :claimed_items,  class_name: "Item", foreign_key: :claimed_by_id
 
-  validates :username,     presence: true, uniqueness: { case_sensitive: false },
+  validates :username,     presence: true,
+                           uniqueness: { case_sensitive: false },
                            format: { with: /\A[a-zA-Z0-9_]+\z/, message: "letters, numbers, underscores only" },
-                           length: { minimum: 3, maximum: 30 }
+                           length: { minimum: 1, maximum: 30 }
   validates :contact_type, inclusion: { in: %w[email phone] }
   validates :email,        format: { with: URI::MailTo::EMAIL_REGEXP },
                            uniqueness: { case_sensitive: false },
@@ -21,9 +22,13 @@ class User < ApplicationRecord
 
   before_save :normalize_contact
 
-  # Find by whichever contact field was provided
   def self.find_by_contact(contact, type)
     type == "email" ? find_by(email: contact.downcase.strip) : find_by(phone: contact.strip)
+  end
+
+  # Display name falls back to email/phone if not set
+  def display_label
+    display_name.presence || email.presence || phone.presence
   end
 
   private

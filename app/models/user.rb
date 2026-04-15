@@ -1,5 +1,7 @@
 # app/models/user.rb
 class User < ApplicationRecord
+  has_secure_password
+
   has_many :owned_events,   class_name: "Event", foreign_key: :owner_id, dependent: :destroy
   has_many :invites,        dependent: :destroy
   has_many :invited_events, through: :invites, source: :event
@@ -9,8 +11,8 @@ class User < ApplicationRecord
 
   validates :username,     presence: true,
                            uniqueness: { case_sensitive: false },
-                           format: { with: /\A[a-zA-Z0-9_]+\z/, message: "letters, numbers, underscores only" },
                            length: { minimum: 1, maximum: 30 }
+  validates :password,     length: { minimum: 6 }, allow_nil: true
   validates :contact_type, inclusion: { in: %w[email phone] }
   validates :email,        format: { with: URI::MailTo::EMAIL_REGEXP },
                            uniqueness: { case_sensitive: false },
@@ -23,12 +25,11 @@ class User < ApplicationRecord
   before_save :normalize_contact
 
   def self.find_by_contact(contact, type)
-    type == "email" ? find_by(email: contact.downcase.strip) : find_by(phone: contact.strip)
+    type == "email" ? find_by(email: contact.to_s.downcase.strip) : find_by(phone: contact.to_s.strip)
   end
 
-  # Display name falls back to email/phone if not set
   def display_label
-    display_name.presence || email.presence || phone.presence
+    display_name.presence || username
   end
 
   private

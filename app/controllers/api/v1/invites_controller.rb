@@ -80,7 +80,7 @@ module Api
           contact_type:  inv.contact_type,
           status:        inv.status,
           is_vip:        inv.is_vip,
-          display_label: inv.nickname.presence || inv.user&.display_name,
+          display_label: inv.user&.username || inv.nickname.presence || inv.contact,
           username:      inv.user&.username,
         }
       end

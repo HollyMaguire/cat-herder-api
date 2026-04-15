@@ -25,7 +25,11 @@ class User < ApplicationRecord
   before_save :normalize_contact
 
   def self.find_by_contact(contact, type)
-    type == "email" ? find_by(email: contact.to_s.downcase.strip) : find_by(phone: contact.to_s.strip)
+    case type
+    when "email"    then find_by(email:    contact.to_s.downcase.strip)
+    when "phone"    then find_by(phone:    contact.to_s.strip)
+    when "username" then find_by(username: contact.to_s.strip)
+    end
   end
 
   def display_label

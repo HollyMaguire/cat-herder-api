@@ -13,7 +13,7 @@ class Availability < ApplicationRecord
     return unless event&.date_range_start && event&.date_range_end
 
     Array(slots).each do |slot|
-      date = Date.parse(slot) rescue nil
+      date = Date.parse(slot.to_s.split('T').first) rescue nil
       next unless date
       unless date >= event.date_range_start && date <= event.date_range_end
         errors.add(:slots, "#{slot} is outside the event's date window " \
@@ -24,7 +24,7 @@ class Availability < ApplicationRecord
 
   def slots_are_valid_dates
     Array(slots).each do |slot|
-      Date.parse(slot) rescue errors.add(:slots, "\"#{slot}\" is not a valid date")
+      Date.parse(slot.to_s.split('T').first) rescue errors.add(:slots, "\"#{slot}\" is not a valid date")
     end
   end
 end

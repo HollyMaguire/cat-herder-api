@@ -72,12 +72,16 @@ module Api
 
       # Strips claimed_by info from the person the gifts are being hidden from.
       def item_json(item)
+        hidden_from = @event.gift_hidden_from.to_s.downcase.strip
+        hidden_type = @event.gift_hidden_from_type.to_s.presence || 'username'
+        user_value  = case hidden_type
+                      when 'email' then @current_user.email.to_s.downcase.strip
+                      when 'phone' then @current_user.phone.to_s.strip
+                      else              @current_user.username.to_s.downcase.strip
+                      end
         is_hidden_user = @event.items_mode == "gift" &&
                          @event.gift_hidden_from.present? &&
-                         (
-                           @event.gift_hidden_from.downcase == @current_user.username.downcase ||
-                           (@current_user.display_name.present? && @event.gift_hidden_from.downcase == @current_user.display_name.downcase)
-                         )
+                         hidden_from == user_value
 
         {
           id:          item.id,

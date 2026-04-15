@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_15_153409) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_15_161035) do
   create_table "availabilities", force: :cascade do |t|
     t.json "slots"
     t.integer "user_id", null: false
@@ -39,6 +39,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_15_153409) do
     t.string "start_time_mode"
     t.string "start_time"
     t.string "invite_guest_contact"
+    t.string "gift_hidden_from_type"
+    t.string "invite_guest_contact_type"
     t.index ["owner_id"], name: "index_events_on_owner_id"
   end
 

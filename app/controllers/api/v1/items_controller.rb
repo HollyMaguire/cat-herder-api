@@ -11,11 +11,10 @@ module Api
         render json: @event.items.map { |i| item_json(i) }
       end
 
-      # POST /api/v1/events/:event_id/items  (owner only)
+      # POST /api/v1/events/:event_id/items
       # Body: { name: "Pasta salad" }
       def create
-        require_owner!
-        item = @event.items.create!(name: params[:name])
+        item = @event.items.create!(name: params[:name], added_by: @current_user)
         render json: item_json(item), status: :created
       rescue ActiveRecord::RecordInvalid => e
         render json: { error: e.message }, status: :unprocessable_entity
@@ -36,7 +35,7 @@ module Api
           item.update!(claimed_by: nil)
 
         elsif params[:name]
-          require_owner!
+          return render json: { error: "Only the event owner can do that" }, status: :forbidden unless @event.owner_id == @current_user.id
           item.update!(name: params[:name])
         end
 
@@ -47,10 +46,11 @@ module Api
         render json: { error: e.message }, status: :unprocessable_entity
       end
 
-      # DELETE /api/v1/events/:event_id/items/:id  (owner only)
+      # DELETE /api/v1/events/:event_id/items/:id  (added_by only)
       def destroy
-        require_owner!
-        @event.items.find(params[:id]).destroy
+        item = @event.items.find(params[:id])
+        return render json: { error: "Only the person who added this item can delete it" }, status: :forbidden unless item.added_by_id == @current_user.id
+        item.destroy
         head :no_content
       rescue ActiveRecord::RecordNotFound
         render json: { error: "Item not found" }, status: :not_found
@@ -74,12 +74,17 @@ module Api
       def item_json(item)
         is_hidden_user = @event.items_mode == "gift" &&
                          @event.gift_hidden_from.present? &&
-                         @event.gift_hidden_from.downcase == @current_user.username.downcase
+                         (
+                           @event.gift_hidden_from.downcase == @current_user.username.downcase ||
+                           (@current_user.display_name.present? && @event.gift_hidden_from.downcase == @current_user.display_name.downcase)
+                         )
 
         {
-          id:         item.id,
-          name:       item.name,
-          claimed_by: is_hidden_user ? (item.claimed_by_id? ? "hidden" : nil) : item.claimed_by&.username,
+          id:          item.id,
+          name:        item.name,
+          claimed_by:  is_hidden_user ? (item.claimed_by_id? ? "hidden" : nil) : item.claimed_by&.username,
+          added_by:    item.added_by&.username,
+          added_by_id: item.added_by_id,
         }
       end
     end

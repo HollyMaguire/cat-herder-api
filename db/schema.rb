@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_14_161201) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_15_153409) do
   create_table "availabilities", force: :cascade do |t|
     t.json "slots"
     t.integer "user_id", null: false
@@ -38,6 +38,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_14_161201) do
     t.string "vip_permission"
     t.string "start_time_mode"
     t.string "start_time"
+    t.string "invite_guest_contact"
     t.index ["owner_id"], name: "index_events_on_owner_id"
   end
 
@@ -61,6 +62,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_14_161201) do
     t.integer "claimed_by_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "added_by_id"
+    t.index ["added_by_id"], name: "index_items_on_added_by_id"
     t.index ["event_id"], name: "index_items_on_event_id"
   end
 
@@ -72,6 +75,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_14_161201) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "display_name"
+    t.string "password_digest"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["phone"], name: "index_users_on_phone", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true

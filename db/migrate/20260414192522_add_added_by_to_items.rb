@@ -32,14 +32,13 @@ module Api
           owner:             @current_user,
           name:              params[:eventName],
           description:       params[:description],
-          vote_mode:           params[:voteMode].presence || false,
+          vote_mode:         params[:voteMode],
           items_mode:        params[:itemsMode]        || "none",
           gift_hidden_from:  params[:giftHiddenFrom],
           date_range_start:  params[:dateRangeStart],
           date_range_end:    params[:dateRangeEnd],
-          invite_permission:   params[:invitePermission] || "host",
-          vip_permission:      params[:vipPermission]    || "host",
-          invite_guest_contact: params[:inviteGuestContact],
+          invite_permission: params[:invitePermission] || "host",
+          vip_permission:    params[:vipPermission]    || "host",
           start_time_mode:   params[:startTimeMode]    || "none",
           start_time:        params[:startTime],
         )
@@ -130,15 +129,14 @@ module Api
         invites_param.each do |inv|
           contact      = inv[:contact] || inv["contact"]
           contact_type = inv[:type]    || inv["type"] || "email"
-          nickname     = inv[:nickname] || inv["nickname"]
           next if contact.blank?
 
           invite = event.invites.create!(
             contact:      contact,
             contact_type: contact_type,
-            nickname:     nickname,
           )
 
+          # If this contact already has a user account, link immediately
           existing_user = User.find_by_contact(contact, contact_type)
           invite.update(user: existing_user) if existing_user
         end
@@ -156,9 +154,8 @@ module Api
           date_range_end:    event.date_range_end,
           confirmed_date:    event.confirmed_date,
           status:            event.status,
-          invite_permission:    event.invite_permission,
-          vip_permission:       event.vip_permission,
-          invite_guest_contact: event.invite_guest_contact,
+          invite_permission: event.invite_permission,
+          vip_permission:    event.vip_permission,
           start_time_mode:   event.start_time_mode,
           start_time:        event.start_time,
           is_owner:          event.owner_id == @current_user&.id,
@@ -171,22 +168,20 @@ module Api
 
       def item_json(item)
         {
-          id:          item.id,
-          name:        item.name,
-          claimed_by:  item.claimed_by ? item.claimed_by.username : nil,
-          added_by:    item.added_by ? item.added_by.username : nil,
-          added_by_id: item.added_by_id,
+          id:         item.id,
+          name:       item.name,
+          claimed_by: item.claimed_by ? item.claimed_by.username : nil,
         }
       end
 
       def invite_json(inv)
         {
-          id:           inv.id,
-          contact_type: inv.contact_type,
-          status:       inv.status,
-          is_vip:       inv.is_vip,
+          id:            inv.id,
+          contact_type:  inv.contact_type,
+          status:        inv.status,
+          is_vip:        inv.is_vip,
           display_label: inv.nickname.presence || inv.user&.display_name,
-          username:     inv.user&.username,
+          username:      inv.user&.username,
         }
       end
     end

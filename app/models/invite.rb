@@ -5,7 +5,7 @@ class Invite < ApplicationRecord
 
   validates :contact,      presence: true
   validates :contact_type, inclusion: { in: %w[email phone username] }
-  validates :status,       inclusion: { in: %w[pending accepted declined] }
+  validates :status,       inclusion: { in: %w[pending accepted declined maybe] }
   validates :contact,      uniqueness: { scope: :event_id, message: "already invited to this event" }
 
   # Called at login/register — links all un-owned invites matching this user's contact.

@@ -154,6 +154,7 @@ module Api
       end
 
       def event_json(event)
+        voted_user_ids = event.availabilities.pluck(:user_id).to_set
         {
           id:                event.id,
           name:              event.name,
@@ -175,7 +176,8 @@ module Api
           is_owner:          event.owner_id == @current_user&.id,
           owner:             { id: event.owner_id, username: event.owner.username },
           items:             event.items.map { |i| item_json(i) },
-          invites:           event.invites.map { |inv| invite_json(inv) },
+          invites:           event.invites.map { |inv| invite_json(inv, voted_user_ids) },
+          my_slots:          event.availabilities.find_by(user: @current_user)&.slots || [],
           availability_results: event.availability_results,
         }
       end
@@ -190,14 +192,15 @@ module Api
         }
       end
 
-      def invite_json(inv)
+      def invite_json(inv, voted_user_ids = Set.new)
         {
-          id:           inv.id,
-          contact_type: inv.contact_type,
-          status:       inv.status,
-          is_vip:       inv.is_vip,
-          display_label: inv.nickname.presence || inv.user&.display_name,
-          username:     inv.user&.username,
+          id:            inv.id,
+          contact_type:  inv.contact_type,
+          status:        inv.status,
+          is_vip:        inv.is_vip,
+          display_label: inv.user&.username || inv.nickname.presence || inv.contact,
+          username:      inv.user&.username,
+          has_voted:     inv.user_id ? voted_user_ids.include?(inv.user_id) : false,
         }
       end
     end

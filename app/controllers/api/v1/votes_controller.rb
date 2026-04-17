@@ -25,7 +25,9 @@ module Api
           if vote.save
             render json: {
               chosen_slot: vote.chosen_slot,
+              my_vote:     vote.chosen_slot,
               vote_tally:  vote_tally,
+              vote_closed: @event.tie_vote_closed?,
             }, status: :ok
           else
             render json: { error: vote.errors.full_messages.join(", ") }, status: :unprocessable_entity
@@ -38,7 +40,8 @@ module Api
           unless @event.vote_mode
             return render json: { error: "Vote mode is not enabled for this event" }, status: :forbidden
           end
-          render json: { tally: vote_tally }
+          my_vote = @event.votes.find_by(user: @current_user)&.chosen_slot
+          render json: { tally: vote_tally, my_vote: my_vote, vote_closed: @event.tie_vote_closed? }
         end
   
         private

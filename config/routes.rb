@@ -22,6 +22,7 @@ Rails.application.routes.draw do
         member do
           get  :most_available_date
           post :resolve_tie
+          post :confirm_winner
         end
         resources :items,          only: [:index, :create, :update, :destroy]
         resources :invites,        only: [:index, :create, :update, :destroy]

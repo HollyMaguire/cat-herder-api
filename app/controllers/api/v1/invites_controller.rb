@@ -19,6 +19,7 @@ module Api
           contact_type = inv[:type]    || inv["type"] || "email"
           next if contact.blank?
 
+          contact = contact.to_s.downcase.strip if contact_type == "username"
           invite = @event.invites.find_or_initialize_by(contact: contact)
           invite.contact_type = contact_type
           invite.nickname     = inv[:nickname] || inv["nickname"] if inv[:nickname] || inv["nickname"]

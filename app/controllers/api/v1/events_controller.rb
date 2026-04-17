@@ -3,8 +3,8 @@ module Api
   module V1
     class EventsController < ApplicationController
       before_action :authenticate_user!
-      before_action :set_event,       only: [:show, :update, :destroy, :most_available_date, :resolve_tie]
-      before_action :require_owner!,  only: [:update, :destroy, :resolve_tie]
+      before_action :set_event,       only: [:show, :update, :destroy, :most_available_date, :resolve_tie, :confirm_winner]
+      before_action :require_owner!,  only: [:update, :destroy, :resolve_tie, :confirm_winner]
 
       # GET /api/v1/events — events the current user owns OR is invited to
       def index
@@ -42,8 +42,10 @@ module Api
           vip_permission:            params[:vipPermission]          || "host",
           invite_guest_contact:      params[:inviteGuestContact],
           invite_guest_contact_type: params[:inviteGuestContactType] || 'username',
-          start_time_mode:   params[:startTimeMode]    || "none",
-          start_time:        params[:startTime],
+          start_time_mode:        params[:startTimeMode]           || "none",
+          start_time:             params[:startTime],
+          bring_label:            params[:bringLabel],
+          availability_deadline:  params[:availabilityDeadline].presence,
         )
 
         if @event.save
@@ -70,8 +72,10 @@ module Api
           vip_permission:            params[:vipPermission]          || @event.vip_permission,
           invite_guest_contact:      params.key?(:inviteGuestContact) ? params[:inviteGuestContact]  : @event.invite_guest_contact,
           invite_guest_contact_type: params[:inviteGuestContactType] || @event.invite_guest_contact_type,
-          start_time_mode:           params[:startTimeMode]          || @event.start_time_mode,
-          start_time:                params.key?(:startTime)         ? params[:startTime]            : @event.start_time,
+          start_time_mode:           params[:startTimeMode]                || @event.start_time_mode,
+          start_time:                params.key?(:startTime)               ? params[:startTime]               : @event.start_time,
+          bring_label:               params.key?(:bringLabel)              ? params[:bringLabel]              : @event.bring_label,
+          availability_deadline:     params.key?(:availabilityDeadline)    ? params[:availabilityDeadline].presence : @event.availability_deadline,
         )
           render json: event_json(@event)
         else
@@ -105,6 +109,17 @@ module Api
           return render json: { error: "That slot is not part of a tie" }, status: :unprocessable_entity
         end
 
+        if @event.update(confirmed_date: slot, status: "confirmed")
+          render json: { confirmed_date: slot }
+        else
+          render json: { error: @event.errors.full_messages.join(", ") }, status: :unprocessable_entity
+        end
+      end
+
+      # POST /api/v1/events/:id/confirm_winner
+      # Confirms a clear availability winner (no tie). Owner only.
+      def confirm_winner
+        slot = params[:chosen_slot]
         if @event.update(confirmed_date: slot, status: "confirmed")
           render json: { confirmed_date: slot }
         else
@@ -154,6 +169,7 @@ module Api
       end
 
       def event_json(event)
+        voted_user_ids = event.availabilities.pluck(:user_id).to_set
         {
           id:                event.id,
           name:              event.name,
@@ -170,12 +186,16 @@ module Api
           invite_guest_contact:      event.invite_guest_contact,
           invite_guest_contact_type: event.invite_guest_contact_type,
           gift_hidden_from_type:     event.gift_hidden_from_type,
-          start_time_mode:   event.start_time_mode,
-          start_time:        event.start_time,
+          start_time_mode:        event.start_time_mode,
+          start_time:             event.start_time,
+          bring_label:            event.bring_label,
+          availability_deadline:  event.availability_deadline,
+          results_ready:          event.results_ready?,
           is_owner:          event.owner_id == @current_user&.id,
           owner:             { id: event.owner_id, username: event.owner.username },
           items:             event.items.map { |i| item_json(i) },
-          invites:           event.invites.map { |inv| invite_json(inv) },
+          invites:           event.invites.map { |inv| invite_json(inv, voted_user_ids) },
+          my_slots:          event.availabilities.find_by(user: @current_user)&.slots || [],
           availability_results: event.availability_results,
         }
       end
@@ -190,14 +210,15 @@ module Api
         }
       end
 
-      def invite_json(inv)
+      def invite_json(inv, voted_user_ids = Set.new)
         {
-          id:           inv.id,
-          contact_type: inv.contact_type,
-          status:       inv.status,
-          is_vip:       inv.is_vip,
-          display_label: inv.nickname.presence || inv.user&.display_name,
-          username:     inv.user&.username,
+          id:            inv.id,
+          contact_type:  inv.contact_type,
+          status:        inv.status,
+          is_vip:        inv.is_vip,
+          display_label: inv.user&.username || inv.nickname.presence || inv.contact,
+          username:      inv.user&.username,
+          has_voted:     inv.user_id ? voted_user_ids.include?(inv.user_id) : false,
         }
       end
     end

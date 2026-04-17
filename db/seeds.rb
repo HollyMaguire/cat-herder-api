@@ -94,7 +94,7 @@ meetup = Event.create!(
   name:             "Team Meetup Q3",
   description:      "Quarterly in-person team day.",
   vote_mode:        false,
-  items_mode:       "surprise",
+  items_mode:       "simpleYes",
   date_range_start: Date.new(2025, 7, 14),
   date_range_end:   Date.new(2025, 7, 18),
   confirmed_date:   "2025-07-16",

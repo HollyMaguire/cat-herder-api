@@ -28,7 +28,7 @@ class User < ApplicationRecord
     case type
     when "email"    then find_by(email:    contact.to_s.downcase.strip)
     when "phone"    then find_by(phone:    contact.to_s.strip)
-    when "username" then find_by(username: contact.to_s.strip)
+    when "username" then find_by("LOWER(username) = ?", contact.to_s.strip.downcase)
     end
   end
 

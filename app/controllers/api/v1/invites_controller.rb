@@ -49,6 +49,7 @@ module Api
       def destroy
         invite = @event.invites.find(params[:id])
         require_owner_or_self!(invite)
+        return if performed?
         invite.destroy
         head :no_content
       rescue ActiveRecord::RecordNotFound

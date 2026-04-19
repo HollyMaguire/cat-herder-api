@@ -51,6 +51,7 @@ module Api
       # GET /api/v1/auth/me
       def me
         authenticate_user!
+        return if performed?
         render json: { user: user_json(@current_user) }
       end
 

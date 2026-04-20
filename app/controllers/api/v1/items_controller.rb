@@ -1,18 +1,13 @@
-# app/controllers/api/v1/items_controller.rb
 module Api
   module V1
     class ItemsController < ApplicationController
       before_action :authenticate_user!
       before_action :set_event
 
-      # GET /api/v1/events/:event_id/items
-      # Hides claimed_by from the gift recipient automatically.
       def index
         render json: @event.items.map { |i| item_json(i) }
       end
 
-      # POST /api/v1/events/:event_id/items
-      # Body: { name: "Pasta salad" }
       def create
         item = @event.items.create!(name: params[:name], added_by: @current_user)
         render json: item_json(item), status: :created
@@ -20,8 +15,6 @@ module Api
         render json: { error: e.message }, status: :unprocessable_entity
       end
 
-      # PATCH /api/v1/events/:event_id/items/:id
-      # Body: { claim: true }  or  { unclaim: true }  or  { name: "new name" }
       def update
         item = @event.items.find(params[:id])
 
@@ -46,7 +39,6 @@ module Api
         render json: { error: e.message }, status: :unprocessable_entity
       end
 
-      # DELETE /api/v1/events/:event_id/items/:id  (added_by only)
       def destroy
         item = @event.items.find(params[:id])
         return render json: { error: "Only the person who added this item can delete it" }, status: :forbidden unless item.added_by_id == @current_user.id
@@ -70,7 +62,6 @@ module Api
         end
       end
 
-      # Strips claimed_by info from the person the gifts are being hidden from.
       def item_json(item)
         hidden_from = @event.gift_hidden_from.to_s.downcase.strip
         hidden_type = @event.gift_hidden_from_type.to_s.presence || 'username'

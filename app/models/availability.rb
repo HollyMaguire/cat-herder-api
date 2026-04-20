@@ -1,4 +1,3 @@
-# app/models/availability.rb
 class Availability < ApplicationRecord
   belongs_to :user
   belongs_to :event

@@ -1,4 +1,3 @@
-# app/models/invite.rb
 class Invite < ApplicationRecord
   belongs_to :event
   belongs_to :user, optional: true  # nil until the invitee logs in and claims it

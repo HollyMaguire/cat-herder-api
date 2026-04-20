@@ -1,4 +1,3 @@
-# app/controllers/application_controller.rb
 class ApplicationController < ActionController::API
   SECRET = Rails.application.credentials.secret_key_base
 

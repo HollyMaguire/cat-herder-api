@@ -1,17 +1,13 @@
-# app/controllers/api/v1/invites_controller.rb
 module Api
   module V1
     class InvitesController < ApplicationController
       before_action :authenticate_user!
       before_action :set_event
 
-      # GET /api/v1/events/:event_id/invites
       def index
         render json: @event.invites.map { |i| invite_json(i) }
       end
 
-      # POST /api/v1/events/:event_id/invites
-      # Body: { invites: [{ contact: "...", type: "email"|"phone" }, ...] }
       def create
         created = []
         Array(params[:invites]).each do |inv|
@@ -33,8 +29,6 @@ module Api
         render json: created, status: :created
       end
 
-      # PATCH /api/v1/events/:event_id/invites/:id
-      # Used to mark is_vip, update RSVP status, link a user
       def update
         invite = @event.invites.find(params[:id])
         invite.update!(invite_update_params)
@@ -45,7 +39,6 @@ module Api
         render json: { error: e.message }, status: :unprocessable_entity
       end
 
-      # DELETE /api/v1/events/:event_id/invites/:id
       def destroy
         invite = @event.invites.find(params[:id])
         require_owner_or_self!(invite)

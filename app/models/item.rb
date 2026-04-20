@@ -1,4 +1,3 @@
-# app/models/item.rb
 class Item < ApplicationRecord
   belongs_to :event
   belongs_to :claimed_by, class_name: "User", optional: true

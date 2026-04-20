@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_16_000002) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_20_210022) do
   create_table "availabilities", force: :cascade do |t|
     t.json "slots"
     t.integer "user_id", null: false
@@ -29,7 +29,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_16_000002) do
     t.string "gift_hidden_from"
     t.date "date_range_start"
     t.date "date_range_end"
-    t.date "confirmed_date"
+    t.string "confirmed_date"
     t.string "status", default: "open", null: false
     t.integer "owner_id", null: false
     t.datetime "created_at", null: false

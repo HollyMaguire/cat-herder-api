@@ -1,4 +1,3 @@
-# app/models/event.rb
 class Event < ApplicationRecord
   belongs_to :owner, class_name: "User"
   has_many   :invites,        dependent: :destroy
@@ -78,10 +77,13 @@ class Event < ApplicationRecord
   # voting round that starts after availability closes, so we only close it
   # when all guests have had a chance to participate.
   def tie_vote_closed?
-    invited_user_ids = invites.where.not(user_id: nil).where.not(status: 'declined').pluck(:user_id)
-    return false if invited_user_ids.empty?
+    declined_user_ids = invites.where(status: 'declined').pluck(:user_id).compact
+    participating_ids = declined_user_ids.any? \
+      ? availabilities.where.not(user_id: declined_user_ids).pluck(:user_id)
+      : availabilities.pluck(:user_id)
+    return true if participating_ids.empty?
     voted_user_ids = votes.pluck(:user_id)
-    (invited_user_ids - voted_user_ids).empty?
+    (participating_ids - voted_user_ids).empty?
   end
 
   # ── Results-ready detection ───────────────────────────────────────────────
@@ -92,7 +94,7 @@ class Event < ApplicationRecord
     return true  if availability_deadline && Date.today >= availability_deadline
 
     invited_user_ids  = invites.where.not(user_id: nil).where.not(status: 'declined').pluck(:user_id)
-    return false if invited_user_ids.empty?
+    return true if invited_user_ids.empty?
 
     submitted_user_ids = availabilities.pluck(:user_id)
     (invited_user_ids - submitted_user_ids).empty?

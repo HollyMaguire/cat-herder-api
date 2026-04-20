@@ -1,4 +1,3 @@
-# app/controllers/api/v1/events_controller.rb
 module Api
   module V1
     class EventsController < ApplicationController
@@ -6,7 +5,6 @@ module Api
       before_action :set_event,       only: [:show, :update, :destroy, :most_available_date, :resolve_tie, :confirm_winner]
       before_action :require_owner!,  only: [:update, :destroy, :resolve_tie, :confirm_winner]
 
-      # GET /api/v1/events — events the current user owns OR is invited to
       def index
         owned   = @current_user.owned_events.includes(:invites, :items)
         invited = @current_user.invited_events.includes(:invites, :items)
@@ -15,18 +13,10 @@ module Api
         render json: events.map { |e| event_json(e) }
       end
 
-      # GET /api/v1/events/:id
       def show
         render json: event_json(@event)
       end
 
-      # POST /api/v1/events
-      # Body: {
-      #   eventName, description, voteMode, itemsMode, giftHiddenFrom,
-      #   dateRangeStart, dateRangeEnd,
-      #   items: ["Pasta salad", "Drinks", ...],
-      #   invites: [{ contact: "...", type: "email"|"phone" }, ...]
-      # }
       def create
         @event = Event.new(
           owner:             @current_user,
@@ -57,7 +47,6 @@ module Api
         end
       end
 
-      # PUT /api/v1/events/:id
       def update
         if @event.update(
           name:                      params[:eventName]              || @event.name,
@@ -83,14 +72,11 @@ module Api
         end
       end
 
-      # DELETE /api/v1/events/:id
       def destroy
         @event.destroy
         head :no_content
       end
 
-      # GET /api/v1/events/:id/most_available_date
-      # Returns availability_results array + tie info
       def most_available_date
         render json: {
           results:  @event.availability_results,
@@ -99,9 +85,6 @@ module Api
         }
       end
 
-      # POST /api/v1/events/:id/resolve_tie
-      # Body: { chosen_slot: "2025-08-14" }
-      # Owner picks the winner when vote_mode is false
       def resolve_tie
         slot = params[:chosen_slot]
 
@@ -116,8 +99,6 @@ module Api
         end
       end
 
-      # POST /api/v1/events/:id/confirm_winner
-      # Confirms a clear availability winner (no tie). Owner only.
       def confirm_winner
         slot = params[:chosen_slot]
         if @event.update(confirmed_date: slot, status: "confirmed")

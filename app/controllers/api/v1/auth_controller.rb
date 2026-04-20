@@ -1,9 +1,7 @@
-# app/controllers/api/v1/auth_controller.rb
 module Api
   module V1
     class AuthController < ApplicationController
 
-      # POST /api/v1/auth/login
       def login
         user = User.find_by_contact(params[:contact], params[:contact_type])
 
@@ -19,7 +17,6 @@ module Api
         render json: { token: generate_token(user), user: user_json(user) }, status: :ok
       end
 
-      # POST /api/v1/auth/register
       def register
         contact      = params[:contact].to_s.strip
         contact_type = params[:contact_type]
@@ -48,9 +45,9 @@ module Api
         end
       end
 
-      # GET /api/v1/auth/me
       def me
         authenticate_user!
+        return if performed?
         render json: { user: user_json(@current_user) }
       end
 

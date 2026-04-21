@@ -9,6 +9,7 @@ Rails.application.routes.draw do
 
       get   'users/me', to: 'users#me'
       patch 'users/me', to: 'users#update'
+      get   'users/me/pending_invites', to: 'users#pending_invites'
       get   'users/:id', to: 'users#show'
 
       resources :events do

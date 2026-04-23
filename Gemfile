@@ -56,9 +56,12 @@ group :development, :test do
   gem "factory_bot_rails"
 end
 
+gem "twilio-ruby", "~> 7.0"
+
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+  gem "letter_opener"
 end
 
 group :test do

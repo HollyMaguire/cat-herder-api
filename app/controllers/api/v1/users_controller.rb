@@ -25,6 +25,21 @@ module Api
           render json: { error: "User not found" }, status: :not_found
         end
 
+        def pending_invites
+          submitted_event_ids = Availability
+            .where(user_id: @current_user.id)
+            .pluck(:event_id)
+
+          invites = Invite
+            .includes(:event)
+            .where(user_id: @current_user.id, status: 'pending')
+            .where.not(event_id: submitted_event_ids)
+
+          render json: invites.map { |i|
+            { invite_id: i.id, event_id: i.event_id, event_name: i.event.name }
+          }
+        end
+
         def update
           if @current_user.update(username: params[:username])
             render json: { username: @current_user.username }

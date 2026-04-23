@@ -142,6 +142,7 @@ module Api
             contact:      contact,
             contact_type: contact_type,
             nickname:     nickname,
+            is_vip:       inv[:is_vip] || inv["is_vip"] || false,
           )
 
           existing_user = User.find_by_contact(contact, contact_type)

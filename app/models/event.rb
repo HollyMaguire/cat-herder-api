@@ -11,15 +11,6 @@ class Event < ApplicationRecord
   validates :status,     inclusion: { in: %w[open confirmed cancelled] }
   validate  :end_date_after_start
 
-  # ── Availability aggregation ─────────────────────────────────────────────
-  #
-  # Returns an array of hashes sorted best-first:
-  #   [{ slot: "2025-08-14", count: 5, vip_count: 2, vip_eligible: true }, ...]
-  #
-  # VIP rule: if any VIP guest has submitted availability, only their available
-  # slots are eligible to win. Among those, the slot with the most total votes
-  # wins. Non-VIP-eligible slots are still returned (for display) but sorted after.
-  # If no VIP has submitted, normal vote ordering applies.
   def availability_results
     declined_user_ids   = invites.where(status: 'declined').pluck(:user_id).compact
     active_avails       = declined_user_ids.any? ? availabilities.where.not(user_id: declined_user_ids) : availabilities
@@ -54,9 +45,6 @@ class Event < ApplicationRecord
     end
   end
 
-  # ── Tie detection ─────────────────────────────────────────────────────────
-  # Tie is only evaluated among eligible slots (VIP-available ones when a VIP
-  # has submitted; all slots otherwise).
   def tied_slots
     results = availability_results
     return [] if results.empty?
@@ -72,10 +60,6 @@ class Event < ApplicationRecord
     tied_slots.length > 1
   end
 
-  # True when every invited user with an account has cast a tie-breaker vote.
-  # The availability deadline is NOT reused here — the tie-breaker is its own
-  # voting round that starts after availability closes, so we only close it
-  # when all guests have had a chance to participate.
   def tie_vote_closed?
     declined_user_ids = invites.where(status: 'declined').pluck(:user_id).compact
     participating_ids = declined_user_ids.any? \
@@ -86,9 +70,6 @@ class Event < ApplicationRecord
     (participating_ids - voted_user_ids).empty?
   end
 
-  # ── Results-ready detection ───────────────────────────────────────────────
-  # True when the deadline has passed OR every invited user who has an account
-  # has submitted their availability.
   def results_ready?
     return false if availabilities.none?
     return true  if availability_deadline && Date.today >= availability_deadline

@@ -1,7 +1,6 @@
 class ApplicationController < ActionController::API
   SECRET = Rails.application.credentials.secret_key_base
 
-  # ── Call before any action that requires auth ──────────────────────────────
   def authenticate_user!
     token   = request.headers["Authorization"]&.split(" ")&.last
     payload = JWT.decode(token, SECRET, true, algorithm: "HS256")[0]
@@ -10,7 +9,6 @@ class ApplicationController < ActionController::API
     render json: { error: "Unauthorized" }, status: :unauthorized
   end
 
-  # ── Soft auth — sets @current_user if token present, does not block ────────
   def load_current_user
     token = request.headers["Authorization"]&.split(" ")&.last
     return unless token

@@ -14,8 +14,8 @@ RSpec.describe "Votes", type: :request do
 
   # Create a genuine tie so vote validation passes
   before do
-    create(:availability, event: event, user: owner, slots: [slot_a])
-    create(:availability, event: event, user: voter, slots: [slot_b])
+    create(:availability, event: event, user: owner, slots: [ slot_a ])
+    create(:availability, event: event, user: voter, slots: [ slot_b ])
   end
 
   def json = JSON.parse(response.body)

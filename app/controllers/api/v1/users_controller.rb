@@ -11,7 +11,7 @@ module Api
             phone:        @current_user.phone,
             contact_type: @current_user.contact_type,
             owned_events:   @current_user.owned_events.count,
-            invited_events: @current_user.invited_events.count,
+            invited_events: @current_user.invited_events.count
           }
         end
 
@@ -19,7 +19,7 @@ module Api
           user = User.find(params[:id])
           render json: {
             id:       user.id,
-            username: user.username,
+            username: user.username
           }
         rescue ActiveRecord::RecordNotFound
           render json: { error: "User not found" }, status: :not_found
@@ -32,7 +32,7 @@ module Api
 
           invites = Invite
             .includes(:event)
-            .where(user_id: @current_user.id, status: 'pending')
+            .where(user_id: @current_user.id, status: "pending")
             .where.not(event_id: submitted_event_ids)
 
           render json: invites.map { |i|
@@ -50,4 +50,4 @@ module Api
         end
       end
     end
-  end
+end

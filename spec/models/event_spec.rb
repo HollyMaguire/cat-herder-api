@@ -36,8 +36,8 @@ RSpec.describe Event, type: :model do
 
     it 'tallies submitted slots' do
       slot = Date.today.to_s
-      create(:availability, event: event, user: user1, slots: [slot])
-      create(:availability, event: event, user: user2, slots: [slot])
+      create(:availability, event: event, user: user1, slots: [ slot ])
+      create(:availability, event: event, user: user2, slots: [ slot ])
 
       results = event.availability_results
       match   = results.find { |r| r[:slot] == slot }
@@ -47,7 +47,7 @@ RSpec.describe Event, type: :model do
     it 'excludes slots from declined users' do
       slot = Date.today.to_s
       invite = create(:invite, event: event, user: user1, status: 'declined')
-      create(:availability, event: event, user: user1, slots: [slot])
+      create(:availability, event: event, user: user1, slots: [ slot ])
 
       results = event.availability_results
       match   = results.find { |r| r[:slot] == slot }
@@ -62,8 +62,8 @@ RSpec.describe Event, type: :model do
         invite = create(:invite, event: event, user: user1, is_vip: true)
         create(:invite, event: event, user: user2, is_vip: false)
 
-        create(:availability, event: event, user: user1, slots: [slot_a])
-        create(:availability, event: event, user: user2, slots: [slot_a, slot_b])
+        create(:availability, event: event, user: user1, slots: [ slot_a ])
+        create(:availability, event: event, user: user2, slots: [ slot_a, slot_b ])
 
         results = event.availability_results
         vip_eligible = results.select { |r| r[:vip_eligible] }
@@ -74,7 +74,7 @@ RSpec.describe Event, type: :model do
 
       it 'treats all slots as eligible when no VIP has submitted' do
         create(:invite, event: event, user: user1, is_vip: true)
-        create(:availability, event: event, user: user2, slots: [slot_a, slot_b])
+        create(:availability, event: event, user: user2, slots: [ slot_a, slot_b ])
 
         results = event.availability_results
         expect(results.all? { |r| r[:vip_eligible] }).to be true
@@ -88,8 +88,8 @@ RSpec.describe Event, type: :model do
     let(:user2) { create(:user) }
 
     it 'returns no tie when one slot has more votes' do
-      create(:availability, event: event, user: user1, slots: [Date.today.to_s, (Date.today + 1).to_s])
-      create(:availability, event: event, user: user2, slots: [Date.today.to_s])
+      create(:availability, event: event, user: user1, slots: [ Date.today.to_s, (Date.today + 1).to_s ])
+      create(:availability, event: event, user: user2, slots: [ Date.today.to_s ])
 
       expect(event.tie?).to be false
       expect(event.tied_slots.length).to eq(1)
@@ -98,8 +98,8 @@ RSpec.describe Event, type: :model do
     it 'detects a tie when two slots share the top count' do
       slot_a = Date.today.to_s
       slot_b = (Date.today + 1).to_s
-      create(:availability, event: event, user: user1, slots: [slot_a])
-      create(:availability, event: event, user: user2, slots: [slot_b])
+      create(:availability, event: event, user: user1, slots: [ slot_a ])
+      create(:availability, event: event, user: user2, slots: [ slot_b ])
 
       expect(event.tie?).to be true
       expect(event.tied_slots.length).to eq(2)
@@ -116,7 +116,7 @@ RSpec.describe Event, type: :model do
 
     it 'returns true when all invited users with accounts have submitted' do
       create(:invite, event: event, user: user1)
-      create(:availability, event: event, user: user1, slots: [Date.today.to_s])
+      create(:availability, event: event, user: user1, slots: [ Date.today.to_s ])
 
       expect(event.results_ready?).to be true
     end
@@ -125,14 +125,14 @@ RSpec.describe Event, type: :model do
       user2 = create(:user)
       create(:invite, event: event, user: user1)
       create(:invite, event: event, user: user2)
-      create(:availability, event: event, user: user1, slots: [Date.today.to_s])
+      create(:availability, event: event, user: user1, slots: [ Date.today.to_s ])
 
       expect(event.results_ready?).to be false
     end
 
     it 'returns true when the availability deadline has passed' do
       event.update!(availability_deadline: Date.yesterday)
-      create(:availability, event: event, user: user1, slots: [Date.today.to_s])
+      create(:availability, event: event, user: user1, slots: [ Date.today.to_s ])
 
       expect(event.results_ready?).to be true
     end
@@ -141,7 +141,7 @@ RSpec.describe Event, type: :model do
       user2 = create(:user)
       create(:invite, event: event, user: user1)
       create(:invite, event: event, user: user2, status: 'declined')
-      create(:availability, event: event, user: user1, slots: [Date.today.to_s])
+      create(:availability, event: event, user: user1, slots: [ Date.today.to_s ])
 
       expect(event.results_ready?).to be true
     end

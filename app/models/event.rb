@@ -12,9 +12,9 @@ class Event < ApplicationRecord
   validate  :end_date_after_start
 
   def availability_results
-    declined_user_ids   = invites.where(status: 'declined').pluck(:user_id).compact
+    declined_user_ids   = invites.where(status: "declined").pluck(:user_id).compact
     active_avails       = declined_user_ids.any? ? availabilities.where.not(user_id: declined_user_ids) : availabilities
-    vip_user_ids        = invites.where(is_vip: true).where.not(status: 'declined').pluck(:user_id).compact
+    vip_user_ids        = invites.where(is_vip: true).where.not(status: "declined").pluck(:user_id).compact
     vips_have_submitted = vip_user_ids.any? &&
                           active_avails.where(user_id: vip_user_ids).exists?
 
@@ -32,7 +32,7 @@ class Event < ApplicationRecord
         slot:         slot,
         count:        data[:count],
         vip_count:    data[:vip_count],
-        vip_eligible: !vips_have_submitted || data[:vip_count] > 0,
+        vip_eligible: !vips_have_submitted || data[:vip_count] > 0
       }
     end
 
@@ -41,7 +41,7 @@ class Event < ApplicationRecord
       other_slots = all_results.select { |s| s[:vip_count] == 0 }.sort_by { |s| -s[:count] }
       vip_slots + other_slots
     else
-      all_results.sort_by { |s| [-s[:vip_count], -s[:count]] }
+      all_results.sort_by { |s| [ -s[:vip_count], -s[:count] ] }
     end
   end
 
@@ -61,7 +61,7 @@ class Event < ApplicationRecord
   end
 
   def tie_vote_closed?
-    declined_user_ids = invites.where(status: 'declined').pluck(:user_id).compact
+    declined_user_ids = invites.where(status: "declined").pluck(:user_id).compact
     participating_ids = declined_user_ids.any? \
       ? availabilities.where.not(user_id: declined_user_ids).pluck(:user_id)
       : availabilities.pluck(:user_id)
@@ -74,7 +74,7 @@ class Event < ApplicationRecord
     return false if availabilities.none?
     return true  if availability_deadline && Date.today >= availability_deadline
 
-    invited_user_ids  = invites.where.not(user_id: nil).where.not(status: 'declined').pluck(:user_id)
+    invited_user_ids  = invites.where.not(user_id: nil).where.not(status: "declined").pluck(:user_id)
     return true if invited_user_ids.empty?
 
     submitted_user_ids = availabilities.pluck(:user_id)

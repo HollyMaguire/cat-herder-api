@@ -1,7 +1,6 @@
 module Api
   module V1
     class AuthController < ApplicationController
-
       def login
         user = User.find_by_contact(params[:contact], params[:contact_type])
 
@@ -26,7 +25,7 @@ module Api
           username:     username,
           display_name: params[:display_name].presence,
           contact_type: contact_type,
-          password:     params[:password],
+          password:     params[:password]
         }
 
         if contact_type == "email"
@@ -60,7 +59,7 @@ module Api
           display_name: user.display_name,
           email:        user.email,
           phone:        user.phone,
-          contact_type: user.contact_type,
+          contact_type: user.contact_type
         }
       end
     end

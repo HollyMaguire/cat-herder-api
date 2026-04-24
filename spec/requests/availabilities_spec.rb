@@ -10,7 +10,7 @@ RSpec.describe "Availabilities", type: :request do
   describe "POST /api/v1/events/:event_id/availabilities" do
     it 'creates availability and returns results' do
       post "/api/v1/events/#{event.id}/availabilities",
-           params: { slots: [slot] }, headers: auth_headers_for(owner), as: :json
+           params: { slots: [ slot ] }, headers: auth_headers_for(owner), as: :json
 
       expect(response).to have_http_status(:ok)
       expect(json['slots']).to include(slot)
@@ -18,19 +18,19 @@ RSpec.describe "Availabilities", type: :request do
     end
 
     it 'upserts — replaces previous submission' do
-      create(:availability, event: event, user: owner, slots: [slot])
+      create(:availability, event: event, user: owner, slots: [ slot ])
       new_slot = (Date.today + 1).to_s
 
       post "/api/v1/events/#{event.id}/availabilities",
-           params: { slots: [new_slot] }, headers: auth_headers_for(owner), as: :json
+           params: { slots: [ new_slot ] }, headers: auth_headers_for(owner), as: :json
 
-      expect(json['slots']).to eq([new_slot])
+      expect(json['slots']).to eq([ new_slot ])
       expect(event.availabilities.count).to eq(1)
     end
 
     it 'returns 422 for slots outside the event window' do
       post "/api/v1/events/#{event.id}/availabilities",
-           params: { slots: [(Date.today + 30).to_s] }, headers: auth_headers_for(owner), as: :json
+           params: { slots: [ (Date.today + 30).to_s ] }, headers: auth_headers_for(owner), as: :json
 
       expect(response).to have_http_status(:unprocessable_entity)
     end

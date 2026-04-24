@@ -12,7 +12,7 @@ RSpec.describe "Invites", type: :request do
 
     it 'creates invites and returns them' do
       post "/api/v1/events/#{event.id}/invites",
-           params: { invites: [{ contact: 'a@b.com', type: 'email' }] },
+           params: { invites: [ { contact: 'a@b.com', type: 'email' } ] },
            headers: auth_headers_for(owner), as: :json
 
       expect(response).to have_http_status(:created)
@@ -21,7 +21,7 @@ RSpec.describe "Invites", type: :request do
 
     it 'ignores blank contacts' do
       post "/api/v1/events/#{event.id}/invites",
-           params: { invites: [{ contact: '', type: 'email' }] },
+           params: { invites: [ { contact: '', type: 'email' } ] },
            headers: auth_headers_for(owner), as: :json
 
       expect(response).to have_http_status(:created)
@@ -30,7 +30,7 @@ RSpec.describe "Invites", type: :request do
 
     it 'links the invite to an existing user by email' do
       post "/api/v1/events/#{event.id}/invites",
-           params: { invites: [{ contact: guest.email, type: 'email' }] },
+           params: { invites: [ { contact: guest.email, type: 'email' } ] },
            headers: auth_headers_for(owner), as: :json
 
       invite = event.invites.find_by(contact: guest.email)
@@ -39,16 +39,16 @@ RSpec.describe "Invites", type: :request do
 
     it 'sends an invite email when the email address has no account' do
       post "/api/v1/events/#{event.id}/invites",
-           params: { invites: [{ contact: 'newperson@example.com', type: 'email' }] },
+           params: { invites: [ { contact: 'newperson@example.com', type: 'email' } ] },
            headers: auth_headers_for(owner), as: :json
 
       expect(ActionMailer::Base.deliveries.size).to eq(1)
-      expect(ActionMailer::Base.deliveries.first.to).to eq(['newperson@example.com'])
+      expect(ActionMailer::Base.deliveries.first.to).to eq([ 'newperson@example.com' ])
     end
 
     it 'does not send an email when the email address already has an account' do
       post "/api/v1/events/#{event.id}/invites",
-           params: { invites: [{ contact: guest.email, type: 'email' }] },
+           params: { invites: [ { contact: guest.email, type: 'email' } ] },
            headers: auth_headers_for(owner), as: :json
 
       expect(ActionMailer::Base.deliveries).to be_empty
@@ -56,7 +56,7 @@ RSpec.describe "Invites", type: :request do
 
     it 'does not send an email for phone invites' do
       post "/api/v1/events/#{event.id}/invites",
-           params: { invites: [{ contact: '+15550001234', type: 'phone' }] },
+           params: { invites: [ { contact: '+15550001234', type: 'phone' } ] },
            headers: auth_headers_for(owner), as: :json
 
       expect(ActionMailer::Base.deliveries).to be_empty
@@ -64,7 +64,7 @@ RSpec.describe "Invites", type: :request do
 
     it 'does not send an email for username invites' do
       post "/api/v1/events/#{event.id}/invites",
-           params: { invites: [{ contact: guest.username, type: 'username' }] },
+           params: { invites: [ { contact: guest.username, type: 'username' } ] },
            headers: auth_headers_for(owner), as: :json
 
       expect(ActionMailer::Base.deliveries).to be_empty

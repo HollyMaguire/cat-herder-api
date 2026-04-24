@@ -22,7 +22,11 @@ module Api
 
           if invite.save
             existing_user = User.find_by_contact(contact, contact_type)
-            invite.update(user: existing_user) if existing_user
+            if existing_user
+              invite.update(user: existing_user)
+            elsif contact_type == "email"
+              InviteMailer.invite_email(invite, @event, @current_user).deliver_now
+            end
             created << invite_json(invite)
           end
         end

@@ -1,0 +1,6 @@
+You've been invited to <%= @event.name %>
+
+<%= @inviter.username %> has invited you to join their event on CatHerder.
+
+Make a free account to manage this invite and be able to create your own events:
+<%= @app_url %>/login?mode=signup&contactType=email&email=<%= CGI.escape(@email) %>

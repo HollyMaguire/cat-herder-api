@@ -64,12 +64,12 @@ module Api
 
       def item_json(item)
         hidden_from = @event.gift_hidden_from.to_s.downcase.strip
-        hidden_type = @event.gift_hidden_from_type.to_s.presence || 'username'
+        hidden_type = @event.gift_hidden_from_type.to_s.presence || "username"
         user_value  = case hidden_type
-                      when 'email' then @current_user.email.to_s.downcase.strip
-                      when 'phone' then @current_user.phone.to_s.strip
-                      else              @current_user.username.to_s.downcase.strip
-                      end
+        when "email" then @current_user.email.to_s.downcase.strip
+        when "phone" then @current_user.phone.to_s.strip
+        else              @current_user.username.to_s.downcase.strip
+        end
         is_hidden_user = @event.items_mode == "gift" &&
                          @event.gift_hidden_from.present? &&
                          hidden_from == user_value
@@ -79,7 +79,7 @@ module Api
           name:        item.name,
           claimed_by:  is_hidden_user ? (item.claimed_by_id? ? "hidden" : nil) : item.claimed_by&.username,
           added_by:    item.added_by&.username,
-          added_by_id: item.added_by_id,
+          added_by_id: item.added_by_id
         }
       end
     end

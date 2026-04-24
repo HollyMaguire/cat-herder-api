@@ -7,11 +7,11 @@ RSpec.describe InviteMailer, type: :mailer do
   let(:mail)   { InviteMailer.invite_email(invite, event, owner) }
 
   it 'sends to the invited email address' do
-    expect(mail.to).to eq(['guest@example.com'])
+    expect(mail.to).to eq([ 'guest@example.com' ])
   end
 
   it 'sends from the CatHerder address' do
-    expect(mail.from).to eq(['CatHerderApp@gmail.com'])
+    expect(mail.from).to eq([ 'CatHerderApp@gmail.com' ])
   end
 
   it 'includes the event name in the subject' do

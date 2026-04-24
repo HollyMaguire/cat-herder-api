@@ -3,8 +3,8 @@ module Api
   module V1
     class EventsController < ApplicationController
       before_action :authenticate_user!
-      before_action :set_event,       only: [:show, :update, :destroy, :most_available_date, :resolve_tie]
-      before_action :require_owner!,  only: [:update, :destroy, :resolve_tie]
+      before_action :set_event,       only: [ :show, :update, :destroy, :most_available_date, :resolve_tie ]
+      before_action :require_owner!,  only: [ :update, :destroy, :resolve_tie ]
 
       # GET /api/v1/events — events the current user owns OR is invited to
       def index
@@ -81,7 +81,7 @@ module Api
         render json: {
           results:  @event.availability_results,
           has_tie:  @event.tie?,
-          tied:     @event.tied_slots,
+          tied:     @event.tied_slots
         }
       end
 
@@ -162,7 +162,7 @@ module Api
           owner:             { id: event.owner_id, username: event.owner.username },
           items:             event.items.map { |i| item_json(i) },
           invites:           event.invites.map { |inv| invite_json(inv) },
-          availability_results: event.availability_results,
+          availability_results: event.availability_results
         }
       end
 
@@ -170,7 +170,7 @@ module Api
         {
           id:         item.id,
           name:       item.name,
-          claimed_by: item.claimed_by ? item.claimed_by.username : nil,
+          claimed_by: item.claimed_by ? item.claimed_by.username : nil
         }
       end
 
@@ -181,7 +181,7 @@ module Api
           status:        inv.status,
           is_vip:        inv.is_vip,
           display_label: inv.nickname.presence || inv.user&.display_name,
-          username:      inv.user&.username,
+          username:      inv.user&.username
         }
       end
     end

@@ -21,7 +21,7 @@ module Api
               chosen_slot: vote.chosen_slot,
               my_vote:     vote.chosen_slot,
               vote_tally:  vote_tally,
-              vote_closed: @event.tie_vote_closed?,
+              vote_closed: @event.tie_vote_closed?
             }, status: :ok
           else
             render json: { error: vote.errors.full_messages.join(", ") }, status: :unprocessable_entity
@@ -53,4 +53,4 @@ module Api
         end
       end
     end
-  end
+end

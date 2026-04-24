@@ -2,8 +2,8 @@ module Api
   module V1
     class EventsController < ApplicationController
       before_action :authenticate_user!
-      before_action :set_event,       only: [:show, :update, :destroy, :most_available_date, :resolve_tie, :confirm_winner]
-      before_action :require_owner!,  only: [:update, :destroy, :resolve_tie, :confirm_winner]
+      before_action :set_event,       only: [ :show, :update, :destroy, :most_available_date, :resolve_tie, :confirm_winner ]
+      before_action :require_owner!,  only: [ :update, :destroy, :resolve_tie, :confirm_winner ]
 
       def index
         owned   = @current_user.owned_events.includes(:invites, :items)
@@ -25,13 +25,13 @@ module Api
           vote_mode:           params[:voteMode].presence || false,
           items_mode:        params[:itemsMode]        || "none",
           gift_hidden_from:          params[:giftHiddenFrom],
-          gift_hidden_from_type:     params[:giftHiddenFromType]     || 'username',
+          gift_hidden_from_type:     params[:giftHiddenFromType]     || "username",
           date_range_start:          params[:dateRangeStart],
           date_range_end:            params[:dateRangeEnd],
           invite_permission:         params[:invitePermission]       || "host",
           vip_permission:            params[:vipPermission]          || "host",
           invite_guest_contact:      params[:inviteGuestContact],
-          invite_guest_contact_type: params[:inviteGuestContactType] || 'username',
+          invite_guest_contact_type: params[:inviteGuestContactType] || "username",
           start_time_mode:        params[:startTimeMode]           || "none",
           start_time:             params[:startTime],
           bring_label:            params[:bringLabel],
@@ -81,7 +81,7 @@ module Api
         render json: {
           results:  @event.availability_results,
           has_tie:  @event.tie?,
-          tied:     @event.tied_slots,
+          tied:     @event.tied_slots
         }
       end
 
@@ -178,7 +178,7 @@ module Api
           items:             event.items.map { |i| item_json(i) },
           invites:           event.invites.map { |inv| invite_json(inv, voted_user_ids) },
           my_slots:          event.availabilities.find_by(user: @current_user)&.slots || [],
-          availability_results: event.availability_results,
+          availability_results: event.availability_results
         }
       end
 
@@ -188,7 +188,7 @@ module Api
           name:        item.name,
           claimed_by:  item.claimed_by ? item.claimed_by.username : nil,
           added_by:    item.added_by ? item.added_by.username : nil,
-          added_by_id: item.added_by_id,
+          added_by_id: item.added_by_id
         }
       end
 
@@ -200,7 +200,7 @@ module Api
           is_vip:        inv.is_vip,
           display_label: inv.user&.username || inv.nickname.presence || inv.contact,
           username:      inv.user&.username,
-          has_voted:     inv.user_id ? voted_user_ids.include?(inv.user_id) : false,
+          has_voted:     inv.user_id ? voted_user_ids.include?(inv.user_id) : false
         }
       end
     end

@@ -17,7 +17,7 @@ module CatHerderApi
       user_name:            ENV["GMAIL_USERNAME"],
       password:             ENV["GMAIL_APP_PASSWORD"],
       authentication:       :plain,
-      enable_starttls_auto: true,
+      enable_starttls_auto: true
     }
     config.action_mailer.perform_deliveries = true
     config.action_mailer.raise_delivery_errors = true

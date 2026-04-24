@@ -13,7 +13,7 @@ module Api
               id:      avail.id,
               user_id: avail.user_id,
               slots:   avail.slots,
-              availability_results: @event.reload.availability_results,
+              availability_results: @event.reload.availability_results
             }, status: :ok
           else
             render json: { error: avail.errors.full_messages.join(", ") }, status: :unprocessable_entity
@@ -29,4 +29,4 @@ module Api
         end
       end
     end
-  end
+end

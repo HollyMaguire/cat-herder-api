@@ -47,14 +47,14 @@ Item.create!([
   { event: potluck, name: "Pasta salad" },
   { event: potluck, name: "Drinks" },
   { event: potluck, name: "Dessert" },
-  { event: potluck, name: "Bread" },
+  { event: potluck, name: "Bread" }
 ])
 
 Invite.create!(event: potluck, contact: bob.email,   contact_type: "email", user: bob,   status: "accepted")
 Invite.create!(event: potluck, contact: sarah.phone, contact_type: "phone", user: sarah, status: "pending")
 
-Availability.create!(user: bob,   event: potluck, slots: ["2025-08-05", "2025-08-10", "2025-08-14"])
-Availability.create!(user: sarah, event: potluck, slots: ["2025-08-10", "2025-08-14"])
+Availability.create!(user: bob,   event: potluck, slots: [ "2025-08-05", "2025-08-10", "2025-08-14" ])
+Availability.create!(user: sarah, event: potluck, slots: [ "2025-08-10", "2025-08-14" ])
 
 puts "  Created: Summer Potluck (open items, 2 guests)"
 
@@ -74,7 +74,7 @@ birthday = Event.create!(
 Item.create!([
   { event: birthday, name: "Amazon gift card" },
   { event: birthday, name: "Spa voucher" },
-  { event: birthday, name: "Book" },
+  { event: birthday, name: "Book" }
 ])
 
 # Mark alice's item as claimed
@@ -83,8 +83,8 @@ Item.find_by(event: birthday, name: "Amazon gift card").update!(claimed_by: alic
 Invite.create!(event: birthday, contact: alice.email,  contact_type: "email", user: alice, status: "accepted", is_vip: false)
 Invite.create!(event: birthday, contact: sarah.phone,  contact_type: "phone", user: sarah, status: "accepted", is_vip: true)
 
-Availability.create!(user: alice, event: birthday, slots: ["2025-09-06", "2025-09-13", "2025-09-20"])
-Availability.create!(user: sarah, event: birthday, slots: ["2025-09-06", "2025-09-13"])
+Availability.create!(user: alice, event: birthday, slots: [ "2025-09-06", "2025-09-13", "2025-09-20" ])
+Availability.create!(user: sarah, event: birthday, slots: [ "2025-09-06", "2025-09-13" ])
 
 puts "  Created: Sarah's Birthday (gift mode, VIP=sarah, group voting)"
 

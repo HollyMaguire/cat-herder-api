@@ -94,7 +94,7 @@ RSpec.describe "Events", type: :request do
   describe "POST /api/v1/events/:id/confirm_winner" do
     let(:slot) { (Date.today + 7).to_s }
 
-    before { create(:availability, event: event, user: owner, slots: [slot]) }
+    before { create(:availability, event: event, user: owner, slots: [ slot ]) }
 
     it 'confirms the winner when requester is owner' do
       post "/api/v1/events/#{event.id}/confirm_winner",
@@ -117,8 +117,8 @@ RSpec.describe "Events", type: :request do
     let(:user2)  { create(:user) }
 
     before do
-      create(:availability, event: event, user: owner, slots: [slot_a])
-      create(:availability, event: event, user: user2, slots: [slot_b])
+      create(:availability, event: event, user: owner, slots: [ slot_a ])
+      create(:availability, event: event, user: user2, slots: [ slot_b ])
     end
 
     it 'resolves a tie when requester is owner' do

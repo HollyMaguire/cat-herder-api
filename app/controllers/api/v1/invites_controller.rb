@@ -25,7 +25,11 @@ module Api
             if existing_user
               invite.update(user: existing_user)
             elsif contact_type == "email"
-              InviteMailer.invite_email(invite, @event, @current_user).deliver_now
+              begin
+                InviteMailer.invite_email(invite, @event, @current_user).deliver_now
+              rescue => e
+                Rails.logger.error "InviteMailer failed for #{contact}: #{e.message}"
+              end
             end
             created << invite_json(invite)
           end

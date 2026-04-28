@@ -19,4 +19,15 @@ Rails.application.configure do
   config.active_record.attributes_for_inspect = [ :id ]
 
   config.action_mailer.default_url_options = { host: URI.parse(ENV.fetch("APP_URL", "http://localhost")).host }
+  config.action_mailer.delivery_method     = :smtp
+  config.action_mailer.raise_delivery_errors = false
+  config.action_mailer.smtp_settings = {
+    address:              "smtp.gmail.com",
+    port:                 587,
+    domain:               "gmail.com",
+    user_name:            ENV["SMTP_USERNAME"],
+    password:             ENV["SMTP_PASSWORD"],
+    authentication:       "plain",
+    enable_starttls_auto: true
+  }
 end

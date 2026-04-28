@@ -56,12 +56,6 @@ module Api
         render json: { error: "Event not found" }, status: :not_found
       end
 
-      def require_owner!
-        unless @event.owner_id == @current_user.id
-          render json: { error: "Only the event owner can do that" }, status: :forbidden
-        end
-      end
-
       def item_json(item)
         hidden_from = @event.gift_hidden_from.to_s.downcase.strip
         hidden_type = @event.gift_hidden_from_type.to_s.presence || "username"

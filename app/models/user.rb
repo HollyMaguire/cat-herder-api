@@ -31,10 +31,6 @@ class User < ApplicationRecord
     end
   end
 
-  def display_label
-    display_name.presence || username
-  end
-
   private
 
   def email_or_phone_present

@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+  <body style="font-family: sans-serif; color: #1a1a1a; max-width: 480px; margin: 0 auto; padding: 24px;">
+    <h2>You've been invited to <%= @event.name %></h2>
+    <p><%= @inviter.username %> has invited you to their event.</p>
+    <a href="<%= @app_url %>/manage/<%= @event.id %>"
+       style="display: inline-block; margin-top: 16px; padding: 12px 24px; background: #0097a7; color: #fff; text-decoration: none; border-radius: 6px;">
+      View event
+    </a>
+  </body>
+</html>

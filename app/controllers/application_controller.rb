@@ -9,16 +9,6 @@ class ApplicationController < ActionController::API
     render json: { error: "Unauthorized" }, status: :unauthorized
   end
 
-  def load_current_user
-    token = request.headers["Authorization"]&.split(" ")&.last
-    return unless token
-
-    payload       = JWT.decode(token, SECRET, true, algorithm: "HS256")[0]
-    @current_user = User.find_by(id: payload["user_id"])
-  rescue JWT::DecodeError
-    nil
-  end
-
   private
 
   def generate_token(user)

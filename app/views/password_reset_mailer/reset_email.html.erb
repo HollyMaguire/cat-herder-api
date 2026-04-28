@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+  <body style="font-family: sans-serif; color: #1a1a1a; max-width: 480px; margin: 0 auto; padding: 24px;">
+    <h2>Reset your password</h2>
+    <p>Hi <%= @user.username %>, we received a request to reset your CatHerder password.</p>
+    <p>This link expires in 1 hour.</p>
+    <a href="<%= @reset_url %>"
+       style="display: inline-block; margin-top: 16px; padding: 12px 24px; background: #0097a7; color: #fff; text-decoration: none; border-radius: 6px;">
+      Reset password
+    </a>
+    <p style="margin-top: 24px; color: #666; font-size: 14px;">If you didn't request this, you can ignore this email.</p>
+  </body>
+</html>

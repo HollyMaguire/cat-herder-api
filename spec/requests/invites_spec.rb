@@ -46,12 +46,13 @@ RSpec.describe "Invites", type: :request do
       expect(ActionMailer::Base.deliveries.first.to).to eq([ 'newperson@example.com' ])
     end
 
-    it 'does not send an email when the email address already has an account' do
+    it 'sends a notification email when the email address already has an account' do
       post "/api/v1/events/#{event.id}/invites",
            params: { invites: [ { contact: guest.email, type: 'email' } ] },
            headers: auth_headers_for(owner), as: :json
 
-      expect(ActionMailer::Base.deliveries).to be_empty
+      expect(ActionMailer::Base.deliveries.size).to eq(1)
+      expect(ActionMailer::Base.deliveries.first.to).to eq([ guest.email ])
     end
 
     it 'does not send an email for phone invites' do
@@ -62,12 +63,13 @@ RSpec.describe "Invites", type: :request do
       expect(ActionMailer::Base.deliveries).to be_empty
     end
 
-    it 'does not send an email for username invites' do
+    it 'sends a notification email for username invites when the user has an email' do
       post "/api/v1/events/#{event.id}/invites",
            params: { invites: [ { contact: guest.username, type: 'username' } ] },
            headers: auth_headers_for(owner), as: :json
 
-      expect(ActionMailer::Base.deliveries).to be_empty
+      expect(ActionMailer::Base.deliveries.size).to eq(1)
+      expect(ActionMailer::Base.deliveries.first.to).to eq([ guest.email ])
     end
   end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_28_205433) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_30_164232) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -46,6 +46,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_28_205433) do
     t.string "invite_guest_contact_type"
     t.string "bring_label"
     t.date "availability_deadline"
+    t.string "date_mode", default: "range"
+    t.boolean "include_fridays", default: false, null: false
+    t.json "custom_dates", default: []
     t.index ["owner_id"], name: "index_events_on_owner_id"
   end
 

@@ -110,8 +110,11 @@ class Event < ApplicationRecord
     return false if availabilities.none?
     return true  if availability_deadline && Date.today >= availability_deadline
 
-    invited_user_ids  = invites.where.not(user_id: nil).where.not(status: "declined").pluck(:user_id)
-    return true if invited_user_ids.empty?
+    non_declined = invites.where.not(status: "declined")
+    return true if non_declined.none?
+
+    invited_user_ids = non_declined.where.not(user_id: nil).pluck(:user_id)
+    return false if invited_user_ids.empty?
 
     submitted_user_ids = availabilities.pluck(:user_id)
     (invited_user_ids - submitted_user_ids).empty?

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_30_164232) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_01_173640) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -99,6 +99,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_30_164232) do
     t.integer "event_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "vote_type", default: "date", null: false
     t.index ["event_id"], name: "index_votes_on_event_id"
     t.index ["user_id"], name: "index_votes_on_user_id"
   end

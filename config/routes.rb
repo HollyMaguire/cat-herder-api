@@ -12,6 +12,7 @@ Rails.application.routes.draw do
       get   "users/me", to: "users#me"
       patch "users/me", to: "users#update"
       get   "users/me/pending_invites", to: "users#pending_invites"
+      get   "users/me/contacts",        to: "users#contacts"
       get   "users/:id", to: "users#show"
 
       resources :events do
@@ -19,12 +20,16 @@ Rails.application.routes.draw do
           get  :most_available_date
           post :resolve_tie
           post :confirm_winner
+          post :confirm_time
         end
         resources :items,          only: [ :index, :create, :update, :destroy ]
         resources :invites,        only: [ :index, :create, :update, :destroy ]
         resources :availabilities, only: [ :create ]
         resources :votes,          only: [ :create ] do
-          collection { get :tally }
+          collection do
+            get :tally
+            get :time_tally
+          end
         end
       end
     end

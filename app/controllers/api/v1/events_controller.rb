@@ -2,8 +2,8 @@ module Api
   module V1
     class EventsController < ApplicationController
       before_action :authenticate_user!
-      before_action :set_event,       only: [ :show, :update, :destroy, :most_available_date, :resolve_tie, :confirm_winner ]
-      before_action :require_owner!,  only: [ :update, :destroy, :resolve_tie, :confirm_winner ]
+      before_action :set_event,       only: [ :show, :update, :destroy, :most_available_date, :resolve_tie, :confirm_winner, :confirm_time ]
+      before_action :require_owner!,  only: [ :update, :destroy, :resolve_tie, :confirm_winner, :confirm_time ]
 
       def index
         owned   = @current_user.owned_events.includes(:invites, :items)
@@ -112,6 +112,19 @@ module Api
         end
       end
 
+      def confirm_time
+        time_slot = params[:chosen_slot].to_s
+        date      = @event.confirmed_date&.split("T")&.first
+        return render json: { error: "No confirmed date yet" }, status: :unprocessable_entity unless date
+
+        new_confirmed = time_slot.include?("T") ? time_slot : "#{date}T#{time_slot}"
+        if @event.update(confirmed_date: new_confirmed)
+          render json: { confirmed_date: @event.confirmed_date }
+        else
+          render json: { error: @event.errors.full_messages.join(", ") }, status: :unprocessable_entity
+        end
+      end
+
       private
 
       def set_event
@@ -170,7 +183,8 @@ module Api
       end
 
       def event_json(event)
-        voted_user_ids = event.availabilities.pluck(:user_id).to_set
+        voted_user_ids   = event.availabilities.pluck(:user_id).to_set
+        my_invite_record = find_my_invite(event)
         {
           id:                event.id,
           name:              event.name,
@@ -199,8 +213,25 @@ module Api
           items:             event.items.map { |i| item_json(i) },
           invites:           event.invites.map { |inv| invite_json(inv, voted_user_ids) },
           my_slots:          event.availabilities.find_by(user: @current_user)&.slots || [],
+          my_invite:         my_invite_record ? invite_json(my_invite_record, voted_user_ids) : nil,
           availability_results: event.availability_results
         }
+      end
+
+      def find_my_invite(event)
+        return nil unless @current_user
+
+        invite = event.invites.find_by(user_id: @current_user.id)
+        return invite if invite
+
+        # Fallback: match by contact value (covers unlinked invites)
+        contact_val = @current_user.contact_type == "email" ? @current_user.email : @current_user.phone
+        invite = event.invites.find_by(contact: contact_val, contact_type: @current_user.contact_type)
+        invite ||= event.invites.find_by("LOWER(contact) = ? AND contact_type = 'username'", @current_user.username.downcase)
+
+        # Link the invite now that we know who it belongs to
+        invite&.update_columns(user_id: @current_user.id) if invite && invite.user_id.nil?
+        invite
       end
 
       def item_json(item)

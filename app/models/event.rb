@@ -17,8 +17,6 @@ class Event < ApplicationRecord
     vip_user_ids        = invites.where(is_vip: true).where.not(status: "declined").pluck(:user_id).compact
     vips_have_submitted = vip_user_ids.any? &&
                           active_avails.where(user_id: vip_user_ids).exists?
-
-    # date_map[date] = { user_ids: {id=>true}, vip_user_ids: {id=>true}, times: {slot=>{count:,vip_count:}} }
     date_map = Hash.new { |h, k| h[k] = { user_ids: {}, vip_user_ids: {}, times: {} } }
 
     active_avails.each do |avail|
@@ -113,9 +111,10 @@ class Event < ApplicationRecord
     non_declined = invites.where.not(status: "declined")
     return true if non_declined.none?
 
-    invited_user_ids = non_declined.where.not(user_id: nil).pluck(:user_id)
-    return false if invited_user_ids.empty?
+  
+    return false if non_declined.where(user_id: nil).exists?
 
+    invited_user_ids   = non_declined.pluck(:user_id)
     submitted_user_ids = availabilities.pluck(:user_id)
     (invited_user_ids - submitted_user_ids).empty?
   end

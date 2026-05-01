@@ -41,13 +41,8 @@ module Api
         end
 
         def contacts
-          # Events the user owns
-          owned_event_ids = @current_user.owned_events.pluck(:id)
-
-          # Events where the user has a linked invite
-          linked_event_ids = Invite.where(user_id: @current_user.id).pluck(:event_id)
-
-          # Events where the user has an unlinked invite matching their contact info
+          owned_event_ids   = @current_user.owned_events.pluck(:id)
+          linked_event_ids  = Invite.where(user_id: @current_user.id).pluck(:event_id)
           contact_event_ids = unlinked_invite_event_ids
 
           all_event_ids = (owned_event_ids + linked_event_ids + contact_event_ids).uniq
@@ -74,7 +69,6 @@ module Api
             end
           end
 
-          # Also include owners of events the user attended as a guest
           guest_event_ids = (linked_event_ids + contact_event_ids).uniq - owned_event_ids
           if guest_event_ids.any?
             Event.where(id: guest_event_ids).includes(:owner).each do |event|

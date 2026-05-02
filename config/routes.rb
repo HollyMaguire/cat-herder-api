@@ -15,6 +15,9 @@ Rails.application.routes.draw do
       get   "users/me/contacts",        to: "users#contacts"
       get   "users/:id", to: "users#show"
 
+      get  "events/invite_preview/:token", to: "events#invite_preview"
+      post "events/join",                  to: "events#join_by_token"
+
       resources :events do
         member do
           get  :most_available_date

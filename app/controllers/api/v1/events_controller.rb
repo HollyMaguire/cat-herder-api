@@ -1,7 +1,7 @@
 module Api
   module V1
     class EventsController < ApplicationController
-      before_action :authenticate_user!
+      before_action :authenticate_user!, except: [ :invite_preview ]
       before_action :set_event,       only: [ :show, :update, :destroy, :most_available_date, :resolve_tie, :confirm_winner, :confirm_time ]
       before_action :require_owner!,  only: [ :update, :destroy, :resolve_tie, :confirm_winner, :confirm_time ]
 
@@ -79,6 +79,40 @@ module Api
       def destroy
         @event.destroy
         head :no_content
+      end
+
+      def invite_preview
+        event = Event.find_by(invite_token: params[:token])
+        return render json: { error: "Not found" }, status: :not_found unless event
+        render json: { event_name: event.name, host_username: event.owner.username }
+      end
+
+      def join_by_token
+        event = Event.find_by(invite_token: params[:token])
+        return render json: { error: "Invalid invite link" }, status: :not_found unless event
+
+        return render json: { event_id: event.id } if event.invites.exists?(user_id: @current_user.id)
+
+        contact_val = @current_user.contact_type == "email" ? @current_user.email : @current_user.phone
+        invite = event.invites.find_by(contact: contact_val, contact_type: @current_user.contact_type)
+        invite ||= event.invites.find_by("LOWER(contact) = ? AND contact_type = 'username'", @current_user.username.downcase)
+
+        if invite
+          invite.update_columns(user_id: @current_user.id)
+        else
+          contact = @current_user.email.presence || @current_user.phone
+          begin
+            event.invites.create!(
+              user:         @current_user,
+              contact:      contact,
+              contact_type: @current_user.contact_type,
+            )
+          rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique
+            event.invites.where(contact: contact).update_all(user_id: @current_user.id)
+          end
+        end
+
+        render json: { event_id: event.id }
       end
 
       def most_available_date
@@ -209,6 +243,7 @@ module Api
           availability_deadline:  event.availability_deadline,
           results_ready:          event.results_ready?,
           is_owner:          event.owner_id == @current_user&.id,
+          invite_token:      event.owner_id == @current_user&.id ? event.invite_token : nil,
           owner:             { id: event.owner_id, username: event.owner.username },
           items:             event.items.map { |i| item_json(i) },
           invites:           event.invites.map { |inv| invite_json(inv, voted_user_ids) },
@@ -224,12 +259,10 @@ module Api
         invite = event.invites.find_by(user_id: @current_user.id)
         return invite if invite
 
-        # Fallback: match by contact value (covers unlinked invites)
         contact_val = @current_user.contact_type == "email" ? @current_user.email : @current_user.phone
         invite = event.invites.find_by(contact: contact_val, contact_type: @current_user.contact_type)
         invite ||= event.invites.find_by("LOWER(contact) = ? AND contact_type = 'username'", @current_user.username.downcase)
 
-        # Link the invite now that we know who it belongs to
         invite&.update_columns(user_id: @current_user.id) if invite && invite.user_id.nil?
         invite
       end

@@ -6,10 +6,13 @@ class Event < ApplicationRecord
   has_many   :availabilities, dependent: :destroy
   has_many   :votes,          dependent: :destroy
 
-  validates :name,       presence: true, length: { maximum: 120 }
-  validates :items_mode, inclusion: { in: %w[none open gift simpleYes] }
-  validates :status,     inclusion: { in: %w[open confirmed cancelled] }
+  validates :name,         presence: true, length: { maximum: 120 }
+  validates :items_mode,   inclusion: { in: %w[none open gift simpleYes] }
+  validates :status,       inclusion: { in: %w[open confirmed cancelled] }
+  validates :invite_token, presence: true, uniqueness: true
   validate  :end_date_after_start
+
+  before_validation :generate_invite_token, on: :create
 
   def availability_results
     declined_user_ids   = invites.where(status: "declined").pluck(:user_id).compact
@@ -125,6 +128,17 @@ class Event < ApplicationRecord
     return unless date_range_start && date_range_end
     if date_range_end < date_range_start
       errors.add(:date_range_end, "must be after the start date")
+    end
+  end
+
+  def generate_invite_token
+    return if invite_token.present?
+    loop do
+      token = SecureRandom.urlsafe_base64(12)
+      unless Event.exists?(invite_token: token)
+        self.invite_token = token
+        break
+      end
     end
   end
 end
